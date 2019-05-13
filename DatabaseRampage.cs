@@ -6,7 +6,7 @@ namespace Rampage
 {
   public partial class DB
   {
-    public static Rampage CreateRampage(long creature_id, int city_id, string status, DateTime date, int damages)
+    public static Rampage CreateRampage(long creature_id, long city_id, string status, DateTime date, int damages)
     {
       MySqlConnection conn = DB.Connection();
       conn.Open();
@@ -25,7 +25,7 @@ namespace Rampage
         Id = cmd.LastInsertedId,
         Creature_id = creature_id,
         City_id = city_id,
-        Stats = status,
+        Status = status,
         Date = date,
         Damages = damages
       };
@@ -45,14 +45,16 @@ namespace Rampage
           Id = rdr.GetInt32(0),
           Creature_id = rdr.GetInt32(1),
           City_id = rdr.GetInt32(2),
-          Stats = rdr.GetString(3),
+          Status = rdr.GetString(3),
           Date = rdr.GetDateTime(4),
           Damages = rdr.GetInt32(5)
         };
 
         rampages.Add(newRampage);
       }
-      return creatures;
+      return rampages;
+
+      //is this right?
     }
 
   }

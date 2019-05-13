@@ -56,7 +56,7 @@ namespace Rampage
       cmd.CommandText = @"SELECT * FROM creature WHERE name = @name;";
       cmd.Parameters.AddWithValue("@name", name);
       MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
-      rdr.Read()
+      rdr.Read();
       Creature newCreature = new Creature() {
         Id = rdr.GetInt32(0),
         Name = rdr.GetString(1),

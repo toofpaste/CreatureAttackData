@@ -48,16 +48,16 @@ namespace Rampage
     {
       Console.WriteLine("'add creature': adds a creature to CAD");
       Console.WriteLine("'add city': adds a city to CAD");
+      Console.WriteLine("'add rampage': adds a rampage incident");
       Console.WriteLine("'creatures': lists all creatures");
       Console.WriteLine("'cities': lists all cities");
-
     }
 
     static bool CreateCreature()
     {
       string input = "";
       Console.WriteLine("enter creature details (name, threat level 0-?, type)");
-      Console.Write("▷");
+      Console.Write("Creature ▷");
       input = Console.ReadLine();
       input.ToLower();
 
@@ -89,7 +89,7 @@ namespace Rampage
     {
       string input = "";
       Console.WriteLine("enter targeted city details (name, population)");
-      Console.Write("▷");
+      Console.Write("City ▷");
       input = Console.ReadLine();
       input.ToLower();
 
@@ -113,8 +113,8 @@ namespace Rampage
     static bool CreateRampage()
     {
       string input = "";
-      Console.WriteLine("enter rampage details (creature, city, date)");
-      Console.Write("▷");
+      Console.WriteLine("enter rampage details (creature, city, date MM DD YYYY)");
+      Console.Write("Rampage ▷");
       input = Console.ReadLine();
       input.ToLower();
 
@@ -123,12 +123,24 @@ namespace Rampage
         return true;
       }
       string[] stats = input.Split();
-      if (!DB.CreatureExist(stats[0])) { return false };
-      Creature creature = GetCreatureByName(name);
+      if (!DB.CreatureExist(stats[0]))
+      {
+        Console.WriteLine("Creature not registered to CAD");
+        return false;
+      }
+      if (!DB.CityExist(stats[1]))
+      {
+        Console.WriteLine("City not registered to CAD");
+        return false;
+      }
+      Creature creature = DB.GetCreatureByName(stats[0]);
+      City city = DB.GetCityByName(stats[1]);
 
       try {
-        Rampage newRampage = DB.CreateRampage(creature.Id, stats[1], stats[2]);
-        Console.WriteLine("Rampage Logged");
+        DateTime date = new DateTime(int.Parse(stats[4]), int.Parse(stats[2]), int.Parse(stats[3]));
+
+        Rampage newRampage = DB.CreateRampage(creature.Id, city.Id, "Ongoing", date, 0);
+        Console.WriteLine("Rampage Logged as an ongoing event");
         return true;
       }
       catch

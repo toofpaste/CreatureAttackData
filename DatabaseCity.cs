@@ -53,7 +53,7 @@ namespace Rampage
       cmd.CommandText = @"SELECT * FROM city WHERE name = @name;";
       cmd.Parameters.AddWithValue("@name", name);
       MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
-      rdr.Read()
+      rdr.Read();
       City newCity = new City() {
         Id = rdr.GetInt32(0),
         Name = rdr.GetString(1),
