@@ -6,72 +6,68 @@ namespace Rampage
 {
   public partial class DB
   {
-    public static Creature CreateCreature(string name, int threat_level, string type)
+    public static City CreateCity(string name, int population)
     {
       MySqlConnection conn = DB.Connection();
       conn.Open();
       MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"INSERT INTO creature (name, threat_level, type) VALUES (@name, @threat_level, @type);";
+      cmd.CommandText = @"INSERT INTO city (name, population) VALUES (@name, @population);";
       cmd.Parameters.AddWithValue("@name", name);
-      cmd.Parameters.AddWithValue("@threat_level", threat_level);
-      cmd.Parameters.AddWithValue("@type", type);
+      cmd.Parameters.AddWithValue("@population", population);
       cmd.ExecuteNonQuery();
       DB.Close(conn);
 
-      return new Creature() {
+      return new City() {
         Id = cmd.LastInsertedId,
         Name = name,
-        Threat_level = threat_level,
-        Type = type
+        Population = population
       };
     }
 
-    public static List<Creature> GetAllCreatures()
+    public static List<City> GetAllCitys()
     {
-      List<Creature> creatures = new List<Creature>();
+      List<City> cities = new List<City>();
       MySqlConnection conn = DB.Connection();
       conn.Open();
       MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"SELECT * FROM creature;";
+      cmd.CommandText = @"SELECT * FROM city;";
       MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
       while(rdr.Read())
       {
-        Creature newCreature = new Creature() {
+        City newCity = new City() {
           Id = rdr.GetInt32(0),
           Name = rdr.GetString(1),
-          Threat_level = rdr.GetInt32(2),
-          Type = rdr.GetString(3)
+          Population = rdr.GetInt32(2)
         };
 
-        creatures.Add(newCreature);
+        cities.Add(newCity);
       }
-      return creatures;
+      return cities;
     }
 
-    public static Creature GetCreatureByName(string name)
+    public static City GetCityByName(string name)
     {
       MySqlConnection conn = DB.Connection();
       conn.Open();
       MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"SELECT * FROM creature WHERE name = @name;";
+      cmd.CommandText = @"SELECT * FROM city WHERE name = @name;";
       cmd.Parameters.AddWithValue("@name", name);
       MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
       rdr.Read()
-      Creature newCreature = new Creature() {
+      City newCity = new City() {
         Id = rdr.GetInt32(0),
         Name = rdr.GetString(1),
-        Threat_level = rdr.GetInt32(2),
-        Type = rdr.GetString(3)
+        Population = rdr.GetInt32(2)
       };
-      return newCreature;
+      return newCity;
     }
 
-    public static bool CreatureExist(string name)
+    public static bool CityExist(string name)
     {
       MySqlConnection conn = DB.Connection();
       conn.Open();
       MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"SELECT * FROM creature WHERE name = @name;";
+      cmd.CommandText = @"SELECT * FROM city WHERE name = @name;";
       cmd.Parameters.AddWithValue("@name", name);
       MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
       return rdr.Read();
