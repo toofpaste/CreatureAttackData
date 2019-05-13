@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 
@@ -53,8 +54,33 @@ namespace Rampage
         rampages.Add(newRampage);
       }
       return rampages;
+    }
 
-      //is this right?
+    public static List<Dictionary<string, string>> GetDetailedAccountOfRampageAndCreatureIncident(long id)
+    {
+      List<Dictionary<string, string>> rampages = new List<Dictionary<string, string>> ();
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+      MySqlCommand cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"SELECT * FROM creature
+      JOIN rampage ON (creature.id = rampage.creature_id)
+      JOIN city ON (rampage.city_id = city.id)
+      WHERE creature.id = @id;";
+      cmd.Parameters.AddWithValue("@id", id);
+      MySqlDataReader rdr = cmd.ExecuteReader() as MySqlDataReader;
+      while(rdr.Read())
+      {
+        Dictionary<string, string> newRampage = new Dictionary<string, string> ();
+        newRampage.Add("creatureName", rdr["name"].ToString());
+        newRampage.Add("type", rdr["type"].ToString());
+        newRampage.Add("status", rdr["status"].ToString());
+        newRampage.Add("date", rdr["date"].ToString());
+        newRampage.Add("damages", rdr["damages"].ToString());
+        newRampage.Add("cityName", rdr.GetString(11));
+        newRampage.Add("population", rdr["population"].ToString());
+        rampages.Add(newRampage);
+      }
+      return rampages;
     }
 
   }

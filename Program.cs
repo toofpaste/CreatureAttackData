@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Rampage
 {
@@ -39,10 +40,46 @@ namespace Rampage
           break;
           case "add rampage": while(!CreateRampage()) {}
           break;
+          case "report": while(!GetCreatureReport()) {}
+          break;
         }
       }
     }
 
+
+    static bool GetCreatureReport()
+    {
+      string input = "";
+      Console.WriteLine("enter creature name");
+      Console.Write("CreatureReport ▷");
+      input = Console.ReadLine();
+      input.ToLower();
+
+      if (input == "q")
+      {
+        return true;
+      }
+      if (!DB.CreatureExist(input))
+      {
+        return false;
+      }
+      else
+      {
+        Creature creature = DB.GetCreatureByName(input);
+        List<Dictionary<string, string>> reports = DB.GetDetailedAccountOfRampageAndCreatureIncident(creature.Id);
+        foreach (Dictionary<string, string> report in reports) {
+          Console.WriteLine("----------------------------------");
+          Console.WriteLine(report["creatureName"]);
+          Console.WriteLine(report["type"]);
+          Console.WriteLine(report["status"]);
+          Console.WriteLine(report["date"]);
+          Console.WriteLine(report["damages"]);
+          Console.WriteLine(report["cityName"]);
+          Console.WriteLine(report["population"]);
+        }
+        return true;
+      }
+    }
 
     static void Help()
     {
