@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using System.Data.Entity;
 
 namespace Rampage
 {
@@ -40,8 +43,8 @@ namespace Rampage
           break;
           case "add rampage": while(!CreateRampage()) {}
           break;
-          case "report": while(!GetCreatureReport()) {}
-          break;
+          // case "report": while(!GetCreatureReport()) {}
+          // break;
         }
       }
     }
@@ -104,8 +107,16 @@ namespace Rampage
       }
       string[] stats = input.Split();
       try {
-        Creature newCreature = DB.CreateCreature(stats[0], int.Parse(stats[1]) , stats[2]);
-        Console.WriteLine("{0} Added", newCreature.Name);
+        string Name = "";
+        using (var db = new CADContext())
+        {
+          var creature = new Creature {Name = stats[0], Threat_level = int.Parse(stats[1]), Type = stats[2]};
+          db.creature.Add(creature);
+          db.SaveChanges();
+          Name = creature.Name;
+        }
+
+        Console.WriteLine("{0} Added", Name);
         return true;
       }
       catch
@@ -118,8 +129,13 @@ namespace Rampage
     static void PrintAllCreatures()
     {
       Console.WriteLine("all known creatures: ");
-      foreach (Creature creature in DB.GetAllCreatures())
-      Console.WriteLine("{0} {1} {2}", creature.Name, creature.Threat_level, creature.Type);
+      using (var db = new CADContext())
+      {
+        var creatures = db.creature.ToList();
+        foreach (Creature creature in creatures) {
+          Console.WriteLine("{0} {1} {2}", creature.Name, creature.Threat_level, creature.Type);
+        }
+      }
     }
 
     static bool CreateCity()
@@ -136,8 +152,15 @@ namespace Rampage
       }
       string[] stats = input.Split();
       try {
-        City newCity = DB.CreateCity(stats[0], int.Parse(stats[1]));
-        Console.WriteLine("{0} Added", newCity.Name);
+        string Name = "";
+        using (var db = new CADContext())
+        {
+          var city = new City {Name = stats[0], Population = int.Parse(stats[1])};
+          db.city.Add(city);
+          db.SaveChanges();
+          Name = city.Name;
+        }
+        Console.WriteLine("{0} Added", Name);
         return true;
       }
       catch
@@ -155,43 +178,52 @@ namespace Rampage
       input = Console.ReadLine();
       input.ToLower();
 
-      if (input == "q")
-      {
-        return true;
-      }
+      if (input == "q") { return true; }
       string[] stats = input.Split();
-      if (!DB.CreatureExist(stats[0]))
-      {
-        Console.WriteLine("Creature not registered to CAD");
-        return false;
-      }
-      if (!DB.CityExist(stats[1]))
-      {
-        Console.WriteLine("City not registered to CAD");
-        return false;
-      }
-      Creature creature = DB.GetCreatureByName(stats[0]);
-      City city = DB.GetCityByName(stats[1]);
 
-      try {
-        DateTime date = new DateTime(int.Parse(stats[4]), int.Parse(stats[2]), int.Parse(stats[3]));
-
-        Rampage newRampage = DB.CreateRampage(creature.Id, city.Id, "Ongoing", date, 0);
-        Console.WriteLine("Rampage Logged as an ongoing event");
-        return true;
-      }
-      catch
+      using (var db = new CADContext())
       {
-        Console.WriteLine("ERROR: Incorrect Values");
-        return false;
+        var creature = db.creature.Where(b => b.Name == stats[0]).FirstOrDefault();
+        var city = db.city.Where(b => b.Name == stats[1]).FirstOrDefault();
+
+        if (creature == null)
+        {
+          Console.WriteLine("Creature not registered to CAD");
+          return false;
+        }
+
+        if (city == null)
+        {
+          Console.WriteLine("City not registered to CAD");
+          return false;
+        }
+
+        try {
+          DateTime date = new DateTime(int.Parse(stats[4]), int.Parse(stats[2]), int.Parse(stats[3]));
+          Rampage rampage = new Rampage {Creature_id = creature.Id, City_id = city.Id, Status = "Ongoing", Date = date, Damages = 0};
+          db.rampage.Add(rampage);
+          db.SaveChanges();
+          Console.WriteLine("Rampage Logged as an ongoing event");
+          return true;
+        }
+        catch
+        {
+          Console.WriteLine("ERROR: Incorrect Values");
+          return false;
+        }
       }
     }
 
     static void PrintAllCities()
     {
-      Console.WriteLine("all targeted cities: ");
-      foreach (City city in DB.GetAllCitys())
-      Console.WriteLine("{0} {1}", city.Name, city.Population);
+      using (var db = new CADContext())
+      {
+        var cities = db.city.ToList();
+        Console.WriteLine("all targeted cities: ");
+        foreach (City city in cities) {
+          Console.WriteLine("{0} {1}", city.Name, city.Population);
+        }
+      }
     }
 
   }
